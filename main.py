@@ -136,6 +136,18 @@ async def handle_interview(req: InterviewRequest):
                 meta=_build_meta(session)
             )
 
+        # 3. End Early case
+        if req.endEarly:
+            reply, done, feedback_data = InterviewEngine.end_interview_early(session)
+            session_manager.save_session(session)
+            feedback = FeedbackSchema(**feedback_data) if feedback_data else None
+            return InterviewResponse(
+                reply=reply,
+                done=True,
+                feedback=feedback,
+                meta=_build_meta(session)
+            )
+
         user_message = req.message or ""
         reply, done, feedback_data = InterviewEngine.process_turn(session, user_message)
         session_manager.save_session(session)

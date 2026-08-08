@@ -246,6 +246,18 @@ class InterviewEngine:
         return cleaned_reply, False, None
 
     @staticmethod
+    def end_interview_early(session: InterviewSession) -> Tuple[str, bool, Dict[str, Any]]:
+        """Terminates an ongoing interview session immediately and generates evaluation feedback."""
+        session.is_complete = True
+        session.phase = "WRAP_UP"
+        cand_name = session.analysis.get("name", "Candidate")
+        closing_reply = f"The technical interview for {cand_name} was concluded early upon request. Evaluated performance across completed curriculum turns."
+        session.add_assistant_message(closing_reply, is_primary_question=False)
+        feedback = generate_feedback(session)
+        session.feedback = feedback
+        return closing_reply, True, feedback
+
+    @staticmethod
     def _clean_response(raw_text: str, target_title: str = "") -> Tuple[str, bool]:
         is_done = "[INTERVIEW_COMPLETE]" in raw_text
         cleaned = raw_text.replace("[INTERVIEW_COMPLETE]", "").strip()

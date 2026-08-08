@@ -91,6 +91,37 @@ def generate_feedback(session: InterviewSession) -> Dict[str, Any]:
     llm = get_llm_provider()
     analysis = session.analysis
 
+    # Extract candidate messages excluding system start prompt
+    user_msgs = [
+        m for m in session.messages
+        if m.get("role") == "user" and m.get("content", "").strip() != "Please start the technical interview. Welcome me briefly and ask the first question."
+    ]
+
+    # Zero-response case: Interview ended early before candidate answered any questions
+    if not user_msgs:
+        cand_name = analysis.get("name", "Candidate")
+        target_day = session.get_current_target_day()
+        day_info = data_loader.get_day_info(target_day) or {}
+        return {
+            "summary": f"The technical interview session for {cand_name} was ended early before any candidate responses were submitted. No live technical answers were provided for evaluation.",
+            "strengths": ["Initialized interview session and loaded candidate profile"],
+            "gaps": ["Session concluded early prior to responding to interview questions"],
+            "next": [
+                "Start a new interview session and answer the technical questions to receive a comprehensive evaluation",
+                "Review curriculum cohort materials and project implementations before interviewing"
+            ],
+            "topic_scores": [
+                {
+                    "day": target_day,
+                    "title": day_info.get("title", f"Day {target_day}"),
+                    "score": 0,
+                    "note": "Session terminated early before candidate submitted any technical responses.",
+                    "tools": day_info.get("tools", [])
+                }
+            ],
+            "evidence": ["No candidate responses submitted during this interview session."]
+        }
+
     conv_text = ""
     for msg in session.messages:
         speaker = "Interviewer" if msg["role"] == "assistant" else "Candidate"

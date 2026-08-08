@@ -57,3 +57,26 @@ def test_full_interview_flow():
     turn_data = res_turn.json()
     assert "reply" in turn_data
     assert "meta" in turn_data
+
+def test_end_interview_early():
+    candidates = data_loader.get_all_candidates()
+    cand = candidates[0]
+    session_id = "test_sess_end_early_456"
+
+    # Start session
+    client.post("/api/interview", json={
+        "sessionId": session_id,
+        "candidate": cand
+    })
+
+    # Send endEarly request
+    res_end = client.post("/api/interview", json={
+        "sessionId": session_id,
+        "endEarly": True
+    })
+    assert res_end.status_code == 200
+    end_data = res_end.json()
+    assert end_data["done"] is True
+    assert "feedback" in end_data
+    assert end_data["feedback"] is not None
+    assert "summary" in end_data["feedback"]

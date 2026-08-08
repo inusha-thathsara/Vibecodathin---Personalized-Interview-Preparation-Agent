@@ -4,6 +4,7 @@ let currentCandidate = null;
 let currentSessionId = null;
 let questionCount = 0;
 let isWaitingForResponse = false;
+let isInterviewInProgress = false;
 let debugLogCount = 0;
 let nonsenseWarnings = 0;
 let lastFeedbackData = null;
@@ -171,6 +172,10 @@ function setupEventListeners() {
     const userInput = document.getElementById('userInput');
 
     candidateSelect.addEventListener('change', (e) => {
+        if (isInterviewInProgress) {
+            showNonsenseToast("Interview in Progress", "You cannot switch candidates while an interview is active. Please complete or end the current interview first.");
+            return;
+        }
         const candidateId = e.target.value;
         debugLog('info', `Candidate dropdown changed: ID='${candidateId}'`);
         if (candidateId && window.candidatesMap) {
@@ -182,6 +187,10 @@ function setupEventListeners() {
     });
 
     startBtn.addEventListener('click', () => {
+        if (isInterviewInProgress) {
+            showNonsenseToast("Interview in Progress", "An interview is currently active. Please finish or click '🛑 End Interview' before starting a new session.");
+            return;
+        }
         if (currentCandidate) {
             debugLog('info', `Start button clicked for candidate '${currentCandidate.member?.name}'`);
             startInterview(currentCandidate);
@@ -189,6 +198,17 @@ function setupEventListeners() {
             debugLog('error', 'Start button clicked but no candidate selected!');
         }
     });
+
+    const endBtn = document.getElementById('endInterviewBtn');
+    if (endBtn) {
+        endBtn.addEventListener('click', () => {
+            if (currentSessionId && !isWaitingForResponse) {
+                if (confirm("Are you sure you want to end this technical interview early? A full evaluation report will be generated based on your completed turns.")) {
+                    endInterviewEarly();
+                }
+            }
+        });
+    }
 
     chatForm.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -204,6 +224,42 @@ function setupEventListeners() {
             chatForm.dispatchEvent(new Event('submit'));
         }
     });
+}
+
+async function endInterviewEarly() {
+    debugLog('info', `Ending interview early for session '${currentSessionId}'...`);
+    isWaitingForResponse = true;
+    showTypingIndicator(true);
+
+    try {
+        const response = await fetch('/api/interview', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                sessionId: currentSessionId,
+                endEarly: true
+            })
+        });
+
+        const data = await response.json();
+        showTypingIndicator(false);
+        isWaitingForResponse = false;
+
+        if (data.reply) {
+            appendMessage('bot', data.reply);
+        }
+        if (data.feedback) {
+            handleInterviewComplete(data.feedback);
+        }
+        if (data.meta) {
+            updateProgressFromMeta(data.meta);
+        }
+    } catch (err) {
+        showTypingIndicator(false);
+        isWaitingForResponse = false;
+        debugLog('error', 'Error terminating interview early', err.message);
+        appendMessage('error', `⚠️ Error ending interview: ${err.message}`);
+    }
 }
 
 function setupCustomDropdown() {
@@ -379,7 +435,39 @@ function renderProfileCard(candidate) {
     document.getElementById('profileCard').style.display = 'flex';
 }
 
+function updateStartButtonState(inProgress) {
+    const startBtn = document.getElementById('startInterviewBtn');
+    if (!startBtn) return;
+    startBtn.disabled = inProgress;
+    if (inProgress) {
+        startBtn.classList.add('disabled-btn');
+        startBtn.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 8v4M12 16h.01"/>
+            </svg>
+            Interview in Progress...
+        `;
+    } else {
+        startBtn.classList.remove('disabled-btn');
+        startBtn.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+            Start Personalized Interview
+        `;
+    }
+}
+
 async function startInterview(candidate) {
+    if (isInterviewInProgress) {
+        showNonsenseToast("Interview in Progress", "An interview is currently active. Please finish or click '🛑 End Interview' before starting a new session.");
+        return;
+    }
+
+    isInterviewInProgress = true;
+    updateStartButtonState(true);
+
     currentSessionId = 'sess_' + Math.random().toString(36).substring(2, 9);
     questionCount = 0;
 
@@ -424,6 +512,8 @@ async function startInterview(candidate) {
             const errDetail = data.detail || 'Unknown server error';
             debugLog('error', `Server error starting interview (${response.status})`, errDetail);
             appendMessage('error', `⚠️ Server Error (${response.status}): ${errDetail}`);
+            isInterviewInProgress = false;
+            updateStartButtonState(false);
             return;
         }
 
@@ -441,6 +531,8 @@ async function startInterview(candidate) {
 
     } catch (err) {
         showTypingIndicator(false);
+        isInterviewInProgress = false;
+        updateStartButtonState(false);
         debugLog('error', 'Network or client error starting interview', err.message);
         appendMessage('error', `⚠️ Network Error: ${err.message}. Please verify backend server on http://127.0.0.1:8000`);
     }
@@ -619,6 +711,8 @@ function updateProgressFromMeta(meta) {
 }
 
 function handleInterviewComplete(feedback) {
+    isInterviewInProgress = false;
+    updateStartButtonState(false);
     lastFeedbackData = feedback;
     document.getElementById('sessionStatus').textContent = 'Interview Complete';
     const statusInd = document.getElementById('statusIndicator');
@@ -661,10 +755,14 @@ function handleInterviewComplete(feedback) {
             const scores = feedback.topic_scores || [];
             scores.forEach(ts => {
                 const card = document.createElement('div');
-                const scoreNum = Number(ts.score) || 6;
-                let badgeClass = 'high';
-                let statusLabel = 'Mastery Demonstrated';
-                if (scoreNum >= 8) {
+                const scoreNum = (ts.score !== undefined && ts.score !== null) ? Number(ts.score) : 0;
+                let badgeClass = 'none';
+                let statusLabel = 'Not Evaluated';
+
+                if (scoreNum === 0) {
+                    badgeClass = 'none';
+                    statusLabel = 'Not Evaluated';
+                } else if (scoreNum >= 8) {
                     badgeClass = 'high';
                     statusLabel = 'Mastery Demonstrated';
                 } else if (scoreNum >= 6) {
@@ -680,6 +778,8 @@ function handleInterviewComplete(feedback) {
                     ? `<div class="topic-score-tools">${tools.map(t => `<span class="topic-tool-chip">${t}</span>`).join('')}</div>`
                     : '';
 
+                const scoreDisplay = scoreNum > 0 ? `${scoreNum}/10` : `0/10`;
+
                 card.className = `topic-score-card ${badgeClass}`;
                 card.innerHTML = `
                     <div class="topic-score-header">
@@ -689,7 +789,7 @@ function handleInterviewComplete(feedback) {
                         </div>
                         <div class="topic-badge-wrapper">
                             <span class="topic-status-label ${badgeClass}">${statusLabel}</span>
-                            <span class="topic-score-badge ${badgeClass}">${scoreNum}/10</span>
+                            <span class="topic-score-badge ${badgeClass}">${scoreDisplay}</span>
                         </div>
                     </div>
                     <div class="topic-score-meter">

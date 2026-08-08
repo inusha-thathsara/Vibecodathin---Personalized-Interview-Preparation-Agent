@@ -1,5 +1,6 @@
 # AI Usage Log
 
+> **Author Note**: I am Inusha Gunasekar, a solo competitor in Vobecodathon hackathon.
 > This file tracks all AI prompts and commands used during the development of the AI Interview Agent for the VibeCodathon hackathon.
 
 ---
@@ -320,4 +321,49 @@
 > run the test cases again
 
 **Result:** Executed test suite via `pytest tests/ -v` — all 15 test cases passed cleanly (**15 passed in 2.56s**).
+
+---
+
+### Prompt 37 — 00:33 IST
+**Tool:** Gemini (Antigravity IDE)
+**Prompt:**
+> Add a button to end an unfinished interview.
+
+**Result:** Implemented **🛑 End Interview** functionality for early interview termination. Added `endEarly` field to `InterviewRequest` schema in `models.py`. Added `InterviewEngine.end_interview_early()` in `interview/engine.py` to immediately set `phase = "WRAP_UP"` and generate structured performance evaluation feedback across completed turns. Added `endEarly` handling in `main.py`. Added `🛑 End Interview` glassmorphic button in `static/index.html` top header bar, confirmation dialog and `endInterviewEarly()` fetch logic in `static/app.js`, red glassmorphic styling in `static/styles.css`, and automated test `test_end_interview_early` in `tests/test_api.py` (**16 / 16 PASSED**).
+
+---
+
+### Prompt 38 — 00:39 IST
+**Tool:** Gemini (Antigravity IDE)
+**Prompt:**
+> I ended the interview just after the first question, without answering any questions. When generating the evaluation summary, it is giving me some good and bad feedback, but I never interacted with the interviewer. I just ended the interview a second after the interview starts without giving any responses. fix it
+
+**Result:** Resolved evaluation report generation for zero-response early terminations. Updated `generate_feedback()` in `interview/feedback.py` to count candidate technical responses. If an interview is terminated early before any candidate answers are submitted (0 answers), the system returns an honest, accurate evaluation report explicitly stating that the session was ended early before answers could be provided, assigning `0/10` topic scores with clear notes (`"Session terminated early before candidate submitted any technical responses"`) instead of fabricating feedback. Added Rule 1 & 2 to `FEEDBACK_SYSTEM_PROMPT` in `interview/prompts.py` and added automated test `test_generate_feedback_zero_responses` in `tests/test_feedback.py` (**17 / 17 PASSED**).
+
+---
+
+### Prompt 39 — 00:43 IST
+**Tool:** Gemini (Antigravity IDE)
+**Prompt:**
+> The system still returns some score after the end of the interview even without taking any user responses.
+
+**Result:** Fixed JavaScript truthy evaluation bug in `static/app.js` where `const scoreNum = Number(ts.score) || 6` evaluated `0 || 6` -> `6` (falsy zero fallback), overriding `0/10` scores with `6/10 PROFICIENT`. Updated `static/app.js` to preserve `0/10` scores explicitly, rendering a neutral slate `NOT EVALUATED` status tag, `0/10` score badge, and `0%` progress meter fill. Added `.none` badge styles to `static/styles.css` (**17 / 17 PASSED**).
+
+---
+
+### Prompt 40 — 00:47 IST
+**Tool:** Gemini (Antigravity IDE)
+**Prompt:**
+> The user should not be able to initiate a new interview when there is an interview in progress.
+
+**Result:** Implemented strict active interview session guards in `static/app.js`. Added `isInterviewInProgress` state tracking and `updateStartButtonState()`. When an interview is active, `#startInterviewBtn` is disabled (`"Interview in Progress..."`) and candidate dropdown switches are blocked with warning toasts (`"An interview is currently active. Please finish or click '🛑 End Interview' before starting a new session."`). State is safely unlocked upon interview completion or early termination (**17 / 17 PASSED**).
+
+---
+
+### Prompt 41 — 00:57 IST
+**Tool:** Gemini (Antigravity IDE)
+**Prompt:**
+> Add a note in the documentation like this. "I am Inusha Gunasekar, a solo competitor in Vobecodathon hackathon."
+
+**Result:** Added the author note block `> **Author Note**: I am Inusha Gunasekar, a solo competitor in Vobecodathon hackathon.` across project documentation files (`README.md`, `PROMPTS.md`, and `technical-spec.md`).
 

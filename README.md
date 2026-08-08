@@ -1,5 +1,7 @@
 # AI Technical Interview Agent | Cohort Simulator
 
+> **Author Note**: I am Inusha Gunasekar, a solo competitor in Vobecodathon hackathon.
+
 An enterprise-grade, personalized AI Technical Interview Agent built for graduating members of an intensive 31-day AI Engineering Cohort program.
 
 The system evaluates candidates across vector search, RAG, prompt engineering, multi-agent frameworks, fine-tuning, and production deployment using adaptive, multi-turn technical dialogues grounded in candidate-specific learning histories.

@@ -1,5 +1,7 @@
 # Technical Specification
 
+> **Author Note**: I am Inusha Gunasekar, a solo competitor in Vobecodathon hackathon.
+
 This document defines the API contract and submission requirements for the AI Interview Agent.
 
 ---

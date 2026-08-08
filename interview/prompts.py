@@ -37,10 +37,14 @@ INTERVIEWER_SYSTEM_PROMPT = """You are an expert AI Technical Interviewer conduc
 12. **CRITICAL — MANDATORY 8 QUESTIONS across 4 DAYS**: The interview MUST cover at least 8 primary questions spanning at least 4 distinct curriculum days before wrapping up. Stay focused on driving through curriculum topics systematically.
 """
 
-FEEDBACK_SYSTEM_PROMPT = """You are a Lead AI Architect evaluating a completed technical interview.
-Based on the transcript below and candidate background, generate a structured performance review.
+FEEDBACK_SYSTEM_PROMPT = """You are a Lead AI Architect evaluating a technical interview.
+Based strictly on the actual transcript turns below and candidate background, generate a structured performance review.
 
 Candidate: {name} ({job_role}, {years_exp} years experience)
+
+CRITICAL EVALUATION RULES:
+1. Base your evaluation STRICTLY on what the candidate actually said in the transcript.
+2. If the candidate ended the interview early or provided very few answers, evaluate ONLY the turns answered, explicitly note that the session was ended early, and do NOT fabricate positive feedback or scores for topics that were never discussed.
 
 Return ONLY a valid JSON object with the following exact structure and no extra formatting or markdown wrappers outside the JSON:
 

@@ -55,6 +55,7 @@ class InterviewRequest(BaseModel):
     sessionId: str = Field(..., description="Unique interview session ID")
     candidate: Optional[CandidateSchema] = Field(None, description="Candidate profile data (sent on initial request)")
     message: Optional[str] = Field(None, description="Candidate answer message (sent on subsequent requests)")
+    endEarly: Optional[bool] = Field(False, description="Flag to terminate the interview session immediately")
 
 class InterviewResponse(BaseModel):
     reply: str = Field(..., description="Interviewer reply text")

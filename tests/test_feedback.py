@@ -28,3 +28,17 @@ def test_generate_feedback_schema():
     assert isinstance(fb["next"], list)
     assert "topic_scores" in fb
     assert "evidence" in fb
+
+def test_generate_feedback_zero_responses():
+    candidates = data_loader.get_all_candidates()
+    cand = candidates[0]
+    session = InterviewSession("test_zero_resp_sess", cand)
+
+    # Session initialized but ended immediately without candidate answers
+    fb = generate_feedback(session)
+    assert "summary" in fb
+    assert "ended early before any candidate responses" in fb["summary"]
+    assert "strengths" in fb
+    assert "gaps" in fb
+    assert fb["topic_scores"][0]["score"] == 0
+    assert "terminated early" in fb["topic_scores"][0]["note"].lower()
