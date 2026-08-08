@@ -414,6 +414,29 @@ async function sendUserMessage(text) {
     }
 }
 
+function formatMessageMarkdown(text) {
+    if (!text) return '';
+    // 1. Escape HTML
+    let escaped = text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    
+    // 2. Bold **text**
+    escaped = escaped.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    
+    // 3. Italic *text*
+    escaped = escaped.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    
+    // 4. Code `text`
+    escaped = escaped.replace(/`(.*?)`/g, '<code>$1</code>');
+    
+    // 5. Linebreaks
+    escaped = escaped.replace(/\n/g, '<br>');
+    
+    return escaped;
+}
+
 function appendMessage(sender, text) {
     const viewport = document.getElementById('chatViewport');
     const indicator = document.getElementById('typingIndicator');
@@ -425,7 +448,7 @@ function appendMessage(sender, text) {
 
     const bubble = document.createElement('div');
     bubble.className = `message-bubble ${sender}`;
-    bubble.textContent = text;
+    bubble.innerHTML = formatMessageMarkdown(text);
 
     debugLog('info', `Appending message bubble [${sender}], length: ${text?.length}`);
 
