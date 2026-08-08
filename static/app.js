@@ -661,13 +661,42 @@ function handleInterviewComplete(feedback) {
             const scores = feedback.topic_scores || [];
             scores.forEach(ts => {
                 const card = document.createElement('div');
-                card.className = 'topic-score-card';
+                const scoreNum = Number(ts.score) || 6;
+                let badgeClass = 'high';
+                let statusLabel = 'Mastery Demonstrated';
+                if (scoreNum >= 8) {
+                    badgeClass = 'high';
+                    statusLabel = 'Mastery Demonstrated';
+                } else if (scoreNum >= 6) {
+                    badgeClass = 'mid';
+                    statusLabel = 'Proficient';
+                } else {
+                    badgeClass = 'low';
+                    statusLabel = 'Needs Consolidation';
+                }
+
+                const tools = ts.tools || [];
+                const toolsHtml = tools.length > 0
+                    ? `<div class="topic-score-tools">${tools.map(t => `<span class="topic-tool-chip">${t}</span>`).join('')}</div>`
+                    : '';
+
+                card.className = `topic-score-card ${badgeClass}`;
                 card.innerHTML = `
                     <div class="topic-score-header">
-                        <span class="topic-score-title">Day ${ts.day}: ${ts.title}</span>
-                        <span class="topic-score-badge">${ts.score}/10</span>
+                        <div class="topic-title-wrapper">
+                            <span class="topic-day-tag">Day ${ts.day}</span>
+                            <span class="topic-score-title">${ts.title}</span>
+                        </div>
+                        <div class="topic-badge-wrapper">
+                            <span class="topic-status-label ${badgeClass}">${statusLabel}</span>
+                            <span class="topic-score-badge ${badgeClass}">${scoreNum}/10</span>
+                        </div>
+                    </div>
+                    <div class="topic-score-meter">
+                        <div class="topic-score-meter-fill ${badgeClass}" style="width: ${Math.min(scoreNum * 10, 100)}%;"></div>
                     </div>
                     <p class="topic-score-note">${ts.note || ''}</p>
+                    ${toolsHtml}
                 `;
                 topicScoresGrid.appendChild(card);
             });
@@ -701,9 +730,10 @@ function generateMarkdownFeedback(fb) {
     md += `\n## Growth Areas & Gaps\n`;
     (fb.gaps || []).forEach(g => md += `- ${g}\n`);
     if (fb.topic_scores && fb.topic_scores.length > 0) {
-        md += `\n## Topic Scores\n`;
+        md += `\n## Curriculum Topic Scores\n`;
         fb.topic_scores.forEach(ts => {
-            md += `- **Day ${ts.day} (${ts.title})**: ${ts.score}/10 — ${ts.note}\n`;
+            const toolsStr = ts.tools && ts.tools.length > 0 ? ` (Tools: ${ts.tools.join(', ')})` : '';
+            md += `- **Day ${ts.day}: ${ts.title}** [${ts.score}/10]${toolsStr}\n  - *Evaluation Note*: ${ts.note}\n`;
         });
     }
     md += `\n## Recommended Next Steps\n`;
