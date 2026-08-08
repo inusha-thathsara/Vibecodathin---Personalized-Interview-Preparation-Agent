@@ -20,6 +20,7 @@ class InterviewSession:
         self.phase: str = "INTRO"
         self.last_answer_quality: Optional[str] = None
         self.interview_notes: str = ""
+        self.last_llm_meta: Dict[str, Any] = {}
         self.created_at: float = time.time()
         self.last_active_at: float = time.time()
 
@@ -53,9 +54,21 @@ class InterviewSession:
 
     def advance_target_day(self):
         target_days = self.analysis.get("target_days", [])
+        if not target_days:
+            target_days = [7, 8, 10, 12, 16, 22, 28, 31]
+            self.analysis["target_days"] = target_days
+
         if self.current_target_index < len(target_days) - 1:
             self.current_target_index += 1
-            self.follow_ups_on_current_day = 0
+        else:
+            all_possible_days = [1, 2, 3, 4, 5, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]
+            for day in all_possible_days:
+                if day not in target_days:
+                    target_days.append(day)
+                    break
+            self.current_target_index = min(self.current_target_index + 1, len(target_days) - 1)
+
+        self.follow_ups_on_current_day = 0
 
     def reset_day_follow_ups(self):
         self.follow_ups_on_current_day = 0

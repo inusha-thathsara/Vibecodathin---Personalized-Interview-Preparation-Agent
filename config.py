@@ -19,7 +19,7 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 GEMINI_MODEL_NAME = os.getenv("GEMINI_MODEL_NAME", "gemini-2.0-flash")
 
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "gemma4:latest")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "gemma3:1b")
 
 # Environment-aware LLM provider default
 _default_provider = "ollama" if APP_ENV == "development" else "gemini"

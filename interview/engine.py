@@ -26,18 +26,16 @@ class InterviewEngine:
         if len(cleaned) < 4:
             return True
 
+        words = [w for w in re.split(r'\s+', cleaned) if w]
         alpha_only = re.sub(r'[^a-zA-Z]', '', cleaned).lower()
         if alpha_only in _LOW_EFFORT_WORDS:
-            return True
-
-        if re.search(r'[bcdfghjklmnpqrstvwxyz]{5,}', cleaned, re.IGNORECASE):
             return True
 
         if re.search(r'(.)\1{6,}', cleaned):
             return True
 
-        words = cleaned.lower().split()
-        if len(words) >= 2:
+        # If response is a multi-word technical paragraph (5+ words), check recognized vocabulary
+        if len(words) >= 5:
             _common = {
                 'the','be','to','of','and','a','in','that','have','i','it','for','not',
                 'on','with','is','are','was','this','but','by','from','they','we','you',
@@ -46,12 +44,20 @@ class InterviewEngine:
                 'vector','embedding','database','model','training','data','api','server',
                 'agent','prompt','rag','retrieval','query','token','llm','code','python',
                 'docker','kubernetes','security','memory','context','pipeline','network',
-                'deploy','function','architecture','production','monitoring','testing'
+                'deploy','function','architecture','production','monitoring','testing',
+                'pca','principal','component','analysis','clustering','segmentation',
+                'variance','overfitting','feature','preprocessing','correlated','metrics',
+                'telemetry','latent','behavioral','archetypes','user','churn','models'
             }
-            recognized = sum(1 for w in words if re.sub(r'[^a-z]', '', w) in _common)
+            recognized = sum(1 for w in words if re.sub(r'[^a-z]', '', w.lower()) in _common)
             ratio = recognized / len(words)
-            avg_len = sum(len(w) for w in words) / len(words)
-            if ratio < 0.15 and avg_len > 5:
+            if ratio >= 0.15 or len(words) >= 15:
+                return False
+
+        # Individual word consonant cluster check (6+ consonants, excluding 'y')
+        for w in words:
+            clean_w = re.sub(r'[^a-zA-Z]', '', w)
+            if re.search(r'[bcdfghjklmnpqrstvwxz]{6,}', clean_w, re.IGNORECASE):
                 return True
 
         return False
@@ -92,7 +98,8 @@ class InterviewEngine:
             {"role": "user", "content": "Please start the technical interview. Welcome me briefly and ask the first question."}
         ]
 
-        response = llm.generate(messages, system_prompt=system_prompt)
+        response, llm_meta = llm.generate_with_metadata(messages, system_prompt=system_prompt)
+        session.last_llm_meta = llm_meta
         cleaned_reply, is_done = InterviewEngine._clean_response(response)
         
         if not cleaned_reply:
@@ -203,8 +210,9 @@ class InterviewEngine:
         # Context compression: send system prompt + recent turns (last 6 messages)
         recent_messages = session.messages[-6:] if len(session.messages) > 6 else session.messages
 
-        response = llm.generate(recent_messages, system_prompt=system_prompt)
-        cleaned_reply, is_done_signal = InterviewEngine._clean_response(response)
+        response, llm_meta = llm.generate_with_metadata(recent_messages, system_prompt=system_prompt)
+        session.last_llm_meta = llm_meta
+        cleaned_reply, is_done_signal = InterviewEngine._clean_response(response, target_title=target_title)
 
         if not cleaned_reply:
             if is_nonsense:
@@ -214,7 +222,16 @@ class InterviewEngine:
             else:
                 cleaned_reply = f"Thank you for that response. Moving to {target_title}, how did you design and optimize your implementation during your cohort project?"
 
-        # 5. Check completion criteria
+        # Question Enforcement Filter: Guarantee non-WRAP_UP responses always contain a direct question mark
+        if "?" not in cleaned_reply and session.phase != "WRAP_UP":
+            logger.info(f"LLM response lacked a question mark for '{target_title}'. Injecting topic-aligned question.")
+            if session.phase == "FOLLOW_UP":
+                cleaned_reply += f"\n\nFollowing up on {target_title}: Could you expand on how you handled edge cases and system performance bottlenecks in your project?"
+            else:
+                cleaned_reply += f"\n\nTransitioning to Day {target_day} — {target_title}: Could you explain your core architecture design and how you validated system performance during your cohort project?"
+                is_primary = True
+
+        # 5. Check completion criteria (minimum 8 primary questions AND minimum 4 days covered)
         force_completion = (session.phase == "WRAP_UP" or (session.primary_questions_asked >= 8 and len(session.covered_days) >= 4))
 
         if force_completion or is_done_signal:
@@ -229,7 +246,18 @@ class InterviewEngine:
         return cleaned_reply, False, None
 
     @staticmethod
-    def _clean_response(raw_text: str) -> Tuple[str, bool]:
+    def _clean_response(raw_text: str, target_title: str = "") -> Tuple[str, bool]:
         is_done = "[INTERVIEW_COMPLETE]" in raw_text
         cleaned = raw_text.replace("[INTERVIEW_COMPLETE]", "").strip()
+
+        placeholders = [
+            "[Insert Next Topic Here]", "[Next Topic Here]", "[Insert Topic]",
+            "[Topic Name]", "[Insert Question]", "[Next Question]", "[Insert Next Question]",
+            "[Insert Next Topic]", "[Topic]"
+        ]
+        for ph in placeholders:
+            if ph in cleaned:
+                topic_str = f"{target_title}" if target_title else "our next focus area"
+                cleaned = cleaned.replace(ph, topic_str)
+
         return cleaned, is_done

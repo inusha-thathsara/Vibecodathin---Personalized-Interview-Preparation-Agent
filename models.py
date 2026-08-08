@@ -45,6 +45,11 @@ class InterviewMeta(BaseModel):
     days_covered: List[int] = Field(default_factory=list, description="List of curriculum day numbers covered")
     current_day: int = Field(7, description="Current target curriculum day")
     current_title: str = Field("", description="Current target curriculum topic title")
+    llm_provider: Optional[str] = Field("ollama", description="Active LLM provider (ollama, gemini, mock)")
+    llm_model: Optional[str] = Field("gemma3:1b", description="Exact LLM model loaded and executing")
+    llm_latency_ms: Optional[float] = Field(0.0, description="Model generation response time in milliseconds")
+    llm_status: Optional[str] = Field("success", description="Status of LLM call (success, fallback, error)")
+    llm_fallback: Optional[bool] = Field(False, description="Whether fallback model was used")
 
 class InterviewRequest(BaseModel):
     sessionId: str = Field(..., description="Unique interview session ID")

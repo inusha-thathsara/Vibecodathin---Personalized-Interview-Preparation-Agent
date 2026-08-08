@@ -186,3 +186,102 @@
 
 **Result:** Received explicit user approval to commit staged changes. Created git commit with custom glassmorphic candidate dropdown UI, real-time search filter, custom scrollbars, and prompt logs.
 
+---
+
+### Prompt 22 — 22:20 IST
+**Tool:** Gemini (Antigravity IDE)
+**Prompt:**
+> Give me a summary paragraph of our project.
+
+**Result:** Provided a comprehensive executive summary paragraph detailing the AI Technical Interview Agent's personalized learning calibration, RAG curriculum engine, deterministic phase flow, FastAPI/Gemini architecture, and glassmorphic UI features.
+
+---
+
+### Prompt 23 — 23:09 IST
+**Tool:** Gemini (Antigravity IDE)
+**Prompt:**
+> <Ollama 500 Internal Server Error traceback>
+
+**Result:** Fixed local Ollama execution error handling in `llm/provider.py`. Added resilient multi-tier fallback hierarchy (`GeminiProvider` → `OllamaProvider` → `OfflineMockProvider`) so that if a local Ollama model tag crashes or fails with HTTP 500, the API endpoint seamlessly falls back to offline response generation without interrupting the interview UI.
+
+---
+
+### Prompt 24 — 23:11 IST
+**Tool:** Gemini (Antigravity IDE)
+**Prompt:**
+> Which module are we using in this project now?
+
+**Result:** Outlined the active modules and tech stack across LLM providers (Gemini API & local Ollama), Gemini `embedding-001` RAG vector engine, FastAPI server framework, PhaseController state engine, and SQLite session persistence.
+
+---
+
+### Prompt 25 — 23:11 IST
+**Tool:** Gemini (Antigravity IDE)
+**Prompt:**
+> No, I meant, are we using a Gemini model or an Ollama model for now?
+
+**Result:** Clarified that the app is currently running in local development mode using an **Ollama model** (`LLM_PROVIDER=ollama` in `.env`), with automatic fallback to `OfflineMockProvider` if Ollama encounters a local error.
+
+---
+
+### Prompt 26 — 23:19 IST
+**Tool:** Gemini (Antigravity IDE)
+**Prompt:**
+> I want to avoid the interviewer asking the same question again and again. refer the screenshot. In this screenshot, the interviewer asked me the same question twice. fix that
+
+**Result:** Resolved question repetition. Added Rule 10 (**CRITICAL — NO REPEATED QUESTIONS**) to system instructions in `interview/prompts.py`. Updated `OfflineMockProvider` in `llm/provider.py` with a turn-progressive dynamic question sequence (`Turn 1: Core concepts` → `Turn 2: Monitoring & reliability` → `Turn 3: Async queues & rate limiting` → `Turn 4: Latency vs quantization` → `Turn 5: Architectural reflection`) ensuring every single turn asks a unique, progressive question with zero repetition.
+
+---
+
+### Prompt 27 — 23:25 IST
+**Tool:** Gemini (Antigravity IDE)
+**Prompt:**
+> implement the debugging mode to see whether the Ollama model is loaded correctly and is it responding, and log the respond time and etc
+
+**Result:** Implemented real-time LLM debug telemetry and latency tracking. Added `generate_with_metadata()` in `llm/provider.py` to measure precise model response latency (ms), verify loaded Ollama model tags, and track fallback status. Extended `InterviewMeta` in `models.py` and `main.py`. Updated `static/app.js` to render live `🤖 [LLM DEBUG TRACE]` entries directly inside the browser's Debug Console Drawer on every interview turn.
+
+---
+
+### Prompt 28 — 23:28 IST
+**Tool:** Gemini (Antigravity IDE)
+**Prompt:**
+> Ollama models are not loading. Please fix it!
+
+**Result:** Resolved local Ollama model loading failure. Identified that `gemma4:latest` was throwing `HTTP 500: Internal Server Error` in local Ollama daemon. Configured `.env` and `config.py` default model to `gemma3:1b` (fast 1B model verified on host machine). Implemented multi-model candidate fallback iteration in `llm/provider.py` (`gemma3:1b` → `qwen3:4b` → `gemma4:e2b` → `qwen2.5`) so if any single model crashes, Ollama automatically attempts the next installed model before dropping to mock.
+
+---
+
+### Prompt 29 — 23:37 IST
+**Tool:** Gemini (Antigravity IDE)
+**Prompt:**
+> The interface says that nonsense is inserted when I input this answer. "Principal Component Analysis (PCA)..."
+
+**Result:** Resolved false positive in nonsense detection logic. The previous consonant cluster regex `[bcdfghjklmnpqrstvwxyz]{5,}` operated across entire text strings and counted `y` as a consonant, falsely flagging technical words like `multi-collinear` and `archetypes`. Fixed in both `interview/engine.py` and `static/app.js` by evaluating consonant clusters per-word (requiring 6+ non-vowels excluding `y`) and bypassing cluster checks for substantive multi-word technical paragraphs (12+ words or recognized AI/data terms).
+
+---
+
+### Prompt 30 — 23:44 IST
+**Tool:** Gemini (Antigravity IDE)
+**Prompt:**
+> the system should Ask a minimum of 8 questions covering at least 4 different curriculum days. But when I was testing the project, it did not ask me any questions.
+
+**Result:** Fixed question progression and placeholder output. Identified that `advance_target_day()` in `interview/session.py` stopped incrementing when target days array index was exhausted, causing the session to freeze at 3 questions. Refactored `session.py` to dynamically expand target days until 8 primary questions across 4+ days are completed. Updated `interview/prompts.py` with Rules 11 & 12 requiring full question generation. Added placeholder sanitization in `_clean_response()` to strip `[Insert Next Topic Here]`.
+
+---
+
+### Prompt 31 — 23:45 IST
+**Tool:** Gemini (Antigravity IDE)
+**Prompt:**
+> Add a proper favicon to the webapp.
+
+**Result:** Created custom glowing SVG favicon at `static/favicon.svg` featuring dark slate/cyan/purple layered geometric neural cohort symbol. Linked favicon tags in `static/index.html`.
+
+---
+
+### Prompt 32 — 23:53 IST
+**Tool:** Gemini (Antigravity IDE)
+**Prompt:**
+> Still, the system does not ask a minimum of eight questions covering at least four different curriculum days. Please fix, because the system should ask at least eight questions covering four or more different curriculum days from the candidate!
+
+**Result:** Fixed interviewer response termination. Added a **Question Enforcement Filter** in `interview/engine.py` that inspects every non-WRAP_UP response generated by the LLM. If the LLM praises the candidate but fails to include a question mark `?`, `InterviewEngine` automatically appends a clear, direct technical question targeting the current focus topic. Updated `interview/phases.py` system instructions. Strictly enforced that completion requires BOTH `primary_questions_asked >= 8` AND `len(covered_days) >= 4`.
+

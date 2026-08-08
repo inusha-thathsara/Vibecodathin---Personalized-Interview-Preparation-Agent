@@ -39,23 +39,32 @@ function analyzeInputQuality(text) {
             return { isNonsense: true, reason: 'Response is too short to be a meaningful technical answer.' };
         }
     }
-    const consonantClusterRegex = /[bcdfghjklmnpqrstvwxyz]{5,}/i;
-    if (consonantClusterRegex.test(trimmed)) {
-        return { isNonsense: true, reason: 'Input appears to contain keyboard mashing or random characters.' };
-    }
+
     const words = trimmed.toLowerCase().split(/\s+/).filter(w => w.length > 0);
-    if (words.length >= 1) {
-        const avgWordLen = words.reduce((s, w) => s + w.length, 0) / words.length;
+    
+    // If it's a substantive multi-word technical explanation (10+ words or 5+ words with recognized terms), it is NOT nonsense
+    if (words.length >= 5) {
         const recognizedWords = words.filter(w => COMMON_WORDS.has(w.replace(/[^a-z]/g, '')));
         const recognizedRatio = recognizedWords.length / words.length;
-        if (words.length >= 2 && recognizedRatio < 0.15 && avgWordLen > 5) {
-            return { isNonsense: true, reason: 'Input doesn\'t contain recognizable technical or English words.' };
+        if (words.length >= 12 || recognizedRatio >= 0.15) {
+            return { isNonsense: false, reason: null };
         }
     }
+
+    // Individual word consonant cluster check (6+ consecutive non-vowels, excluding 'y')
+    const consonantClusterRegex = /[bcdfghjklmnpqrstvwxz]{6,}/i;
+    for (const w of words) {
+        const cleanW = w.replace(/[^a-zA-Z]/g, '');
+        if (consonantClusterRegex.test(cleanW)) {
+            return { isNonsense: true, reason: 'Input appears to contain keyboard mashing or random characters.' };
+        }
+    }
+
     const repeatedCharRegex = /(.)(\1{6,})/;
     if (repeatedCharRegex.test(trimmed)) {
         return { isNonsense: true, reason: 'Input contains excessive character repetition.' };
     }
+
     const singleWord = trimmed.replace(/[^a-zA-Z]/g, '').toLowerCase();
     const lowEffortSingles = ['hi','hello','hey','yo','sup','lol','lmao','bruh',
         'haha','ok','hmm','idk','nah','meh','wat','huh','wow','omg','nice','cool',
@@ -63,10 +72,12 @@ function analyzeInputQuality(text) {
     if (lowEffortSingles.includes(singleWord)) {
         return { isNonsense: true, reason: `"${trimmed}" is not a substantive technical response.` };
     }
+
     const alphaChars = trimmed.replace(/[^a-zA-Z]/g, '');
     if (alphaChars.length < 3 && trimmed.length > 2) {
         return { isNonsense: true, reason: 'Input contains no meaningful text content.' };
     }
+
     return { isNonsense: false, reason: null };
 }
 
@@ -593,6 +604,17 @@ function updateProgressFromMeta(meta) {
     const topicEl = document.getElementById('currentTopicIndicator');
     if (topicEl) {
         topicEl.textContent = `Day ${meta.current_day}: ${meta.current_title || ''}`;
+    }
+
+    // Rich LLM Telemetry Debug Drawer Trace
+    if (meta.llm_provider || meta.llm_model) {
+        const providerName = (meta.llm_provider || 'ollama').toUpperCase();
+        const modelName = meta.llm_model || 'unknown-model';
+        const latency = meta.llm_latency_ms ? `${meta.llm_latency_ms}ms` : 'N/A';
+        const isFallback = meta.llm_fallback ? ' [FALLBACK ACTIVE]' : '';
+        const statusType = meta.llm_fallback ? 'error' : 'success';
+
+        debugLog(statusType, `🤖 [LLM DEBUG TRACE] Provider: ${providerName} | Model: ${modelName} | Latency: ${latency} | Status: ${meta.llm_status || 'OK'}${isFallback}`);
     }
 }
 

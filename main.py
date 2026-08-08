@@ -73,12 +73,19 @@ async def on_startup():
 def _build_meta(session: InterviewSession) -> InterviewMeta:
     target_day = session.get_current_target_day()
     day_info = data_loader.get_day_info(target_day) or {}
+    llm_meta = getattr(session, "last_llm_meta", {}) or {}
+
     return InterviewMeta(
         phase=session.phase,
         primary_questions=session.primary_questions_asked,
         days_covered=sorted(list(session.covered_days)),
         current_day=target_day,
-        current_title=day_info.get("title", f"Day {target_day}")
+        current_title=day_info.get("title", f"Day {target_day}"),
+        llm_provider=llm_meta.get("provider", config.LLM_PROVIDER),
+        llm_model=llm_meta.get("model", config.OLLAMA_MODEL),
+        llm_latency_ms=llm_meta.get("latency_ms", 0.0),
+        llm_status=llm_meta.get("status", "success"),
+        llm_fallback=llm_meta.get("fallback", False)
     )
 
 @app.get("/health")

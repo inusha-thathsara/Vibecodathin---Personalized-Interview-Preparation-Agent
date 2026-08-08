@@ -68,7 +68,7 @@ class PhaseController:
             return (
                 "### CURRENT PHASE: CORE INTERVIEW\n"
                 "Acknowledge the candidate's previous response succinctly (1 sentence). "
-                "Then, transition smoothly to the next planned curriculum topic and ask ONE clear, focused technical question."
+                "Then, transition smoothly to the planned curriculum focus and ask ONE clear, focused technical question. YOUR RESPONSE MUST END WITH A DIRECT TECHNICAL QUESTION ENDING WITH A QUESTION MARK ('?')."
             )
 
         elif phase == "WRAP_UP":
