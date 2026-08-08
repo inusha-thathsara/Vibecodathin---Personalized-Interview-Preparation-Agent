@@ -114,3 +114,39 @@
 
 **Result:** Implemented all 9 phases of full project improvements: clean `.gitignore` & safe secrets, typed candidate models, environment-based LLM routing, `/health` endpoint & CORS/rate limiting, PhaseController state machine (`INTRO`, `CORE`, `FOLLOW_UP`, `WRAP_UP`), AnswerEvaluator, curriculum RAG module with pre-computed embedding cache, SQLite session persistence store, server-synced metadata, SSE streaming endpoint, exportable Markdown feedback, Dockerfile + Render deployment manifests, 15-test pytest suite, and comprehensive README documentation.
 
+---
+
+### Prompt 14 — 21:06 IST
+**Tool:** Gemini (Antigravity IDE)
+**Prompt:**
+> Use this github repo for this project. https://github.com/inusha-thathsara/Vibecodathin---Personalized-Interview-Preparation-Agent
+
+**Result:** Initialized Git repository on `main` branch, linked remote origin to `https://github.com/inusha-thathsara/Vibecodathin---Personalized-Interview-Preparation-Agent.git`, updated README.md clone URL, and created initial commit.
+
+---
+
+### Prompt 15 — 22:00 IST
+**Tool:** Gemini (Antigravity IDE)
+**Prompt:**
+> Something has happened to styling in this UI. Please fix this!
+
+**Result:** Investigated UI element class mismatches and button SVG sizing issues.
+
+---
+
+### Prompt 16 — 22:04 IST
+**Tool:** Gemini (Antigravity IDE)
+**Prompt:**
+> Still there are so many styling issues in the UI. Please fix those! For example, there is a drop down menu issue and "start personalized interview". and respose text area and the send button is not aligned properly.
+
+**Result:** Identified complete class name divergence between `index.html` and `styles.css`. Completely rewrote `styles.css` with unified design tokens and selectors covering candidate dropdown custom arrow, Start button SVG polygon constraints, chip tags flex wrapping, bottom chat input bar fixed positioning (`height: 72px`, `z-index: 50`), chat viewport height calculation, and message bubble Markdown rendering.
+
+---
+
+### Prompt 17 — 22:04 IST
+**Tool:** Gemini (Antigravity IDE)
+**Prompt:**
+> Please log every prompt I give to you to the prompts.md file.
+
+**Result:** Logged all recent user prompts and actions into `PROMPTS.md`.
+
