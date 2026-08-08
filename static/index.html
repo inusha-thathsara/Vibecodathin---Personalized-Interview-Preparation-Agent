@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Technical Interview Agent | Cohort Simulator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation & Candidate Selector -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-logo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                </div>
+                <h2>AI Engineering Cohort</h2>
+                <span class="badge">Enterprise Simulator</span>
+            </div>
+
+            <div class="sidebar-section">
+                <label for="candidateSelect">Select Candidate</label>
+                <div class="select-wrapper">
+                    <select id="candidateSelect">
+                        <option value="" disabled selected>-- Choose a Graduating Member --</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Candidate Analysis Card -->
+            <div class="profile-card" id="profileCard" style="display: none;">
+                <div class="profile-header">
+                    <h3 id="candName">--</h3>
+                    <span class="role-tag" id="candRole">--</span>
+                </div>
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Experience</span>
+                        <span class="stat-value" id="candExp">--</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Calibrated Level</span>
+                        <span class="stat-value highlight" id="candDifficulty">--</span>
+                    </div>
+                </div>
+
+                <div class="topics-section">
+                    <h4>Identified Struggle Days</h4>
+                    <div class="chip-group" id="struggleChips"></div>
+                </div>
+
+                <div class="topics-section">
+                    <h4>First-Try Mastery Wins</h4>
+                    <div class="chip-group" id="masteryChips"></div>
+                </div>
+
+                <button class="primary-btn" id="startInterviewBtn" type="button">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="5 3 19 12 5 21 5 3"/>
+                    </svg>
+                    Start Personalized Interview
+                </button>
+            </div>
+
+            <div class="sidebar-footer">
+                <p>FastAPI + Gemini / Ollama RAG Agent</p>
+                <span class="version">v1.2.0 • Live Stream</span>
+            </div>
+        </aside>
+
+        <!-- Main Interview Workspace -->
+        <main class="main-content">
+            <!-- Header Bar -->
+            <header class="top-bar">
+                <div class="interview-status">
+                    <div class="status-indicator" id="statusIndicator"></div>
+                    <span id="sessionStatus">Select a candidate to start interview</span>
+                    <span class="phase-badge" id="phaseBadge" style="display: none;">CORE</span>
+                </div>
+                <div class="topic-indicator-bar" id="topicIndicatorBar" style="display: none;">
+                    <span class="topic-label">Focus Topic:</span>
+                    <span class="topic-value" id="currentTopicIndicator">--</span>
+                </div>
+                <div class="progress-container" id="progressContainer" style="display: none;">
+                    <button id="debugToggleBtn" class="debug-toggle-btn" type="button">🐞 Debug Log (0)</button>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" id="progressFill" style="width: 0%;"></div>
+                    </div>
+                    <span class="progress-text" id="progressText">0 / 8 Questions</span>
+                </div>
+            </header>
+
+            <!-- Chat Message Feed -->
+            <div class="chat-viewport" id="chatViewport" aria-live="polite">
+                <div class="welcome-banner" id="welcomeBanner">
+                    <div class="banner-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 16v-4M12 8h.01"/>
+                        </svg>
+                    </div>
+                    <h3>AI Cohort Interview Simulator</h3>
+                    <p>This agent conducts a realistic technical interview tailored to each candidate's learning history, struggle areas, and completed missions across the 31-day curriculum.</p>
+                </div>
+                <!-- Chat messages appended here -->
+                <div class="typing-indicator" id="typingIndicator" style="display: none;">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <span>Interviewer is reasoning...</span>
+                </div>
+            </div>
+
+            <!-- Structured Feedback Card Modal / Overlay -->
+            <div class="feedback-panel" id="feedbackPanel" style="display: none;">
+                <div class="feedback-header">
+                    <div class="feedback-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                            <path d="M22 4L12 14.01l-3-3"/>
+                        </svg>
+                        <h3>Technical Interview Evaluation</h3>
+                    </div>
+                    <div class="feedback-header-actions">
+                        <span class="done-badge">COMPLETED</span>
+                        <button id="copyFbBtn" class="export-btn" type="button" title="Copy feedback as Markdown">📋 Copy MD</button>
+                        <button id="downloadFbBtn" class="export-btn" type="button" title="Download Markdown file">💾 Download</button>
+                    </div>
+                </div>
+
+                <div class="feedback-section">
+                    <h4>Executive Summary</h4>
+                    <p id="fbSummary" class="feedback-summary-text"></p>
+                </div>
+
+                <div class="feedback-grid">
+                    <div class="feedback-card strengths-card">
+                        <h4>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            Key Strengths
+                        </h4>
+                        <ul id="fbStrengths"></ul>
+                    </div>
+
+                    <div class="feedback-card gaps-card">
+                        <h4>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                            Growth Areas & Gaps
+                        </h4>
+                        <ul id="fbGaps"></ul>
+                    </div>
+                </div>
+
+                <div class="feedback-section">
+                    <h4>Curriculum Topic Scores</h4>
+                    <div id="fbTopicScores" class="topic-scores-grid"></div>
+                </div>
+
+                <div class="feedback-section">
+                    <h4>Recommended Next Steps</h4>
+                    <ul id="fbNext" class="next-steps-list"></ul>
+                </div>
+            </div>
+
+            <!-- Input Bar -->
+            <form class="chat-input-bar" id="chatForm">
+                <input 
+                    type="text" 
+                    id="userInput" 
+                    class="chat-input" 
+                    placeholder="Type your technical response..." 
+                    autocomplete="off"
+                    disabled
+                />
+                <button type="submit" id="sendBtn" class="send-btn" disabled aria-label="Send Message">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="22" y1="2" x2="11" y2="13"/>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                    </svg>
+                </button>
+            </form>
+        </main>
+    </div>
+
+    <!-- Live Execution Trace Drawer -->
+    <div class="debug-drawer" id="debugDrawer" style="display: none;">
+        <div class="debug-header">
+            <h4>🐞 Live Execution & DOM Trace Log</h4>
+            <button id="closeDebugBtn" class="debug-close-btn" type="button">&times;</button>
+        </div>
+        <div class="debug-content" id="debugContent"></div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+.env
+*.env
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+ENV/
+.chroma/
+*.db
+.gemini/
+.idea/
+.vscode/
+.DS_Store
