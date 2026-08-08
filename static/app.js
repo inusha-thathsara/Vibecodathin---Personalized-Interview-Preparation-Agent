@@ -195,6 +195,96 @@ function setupEventListeners() {
     });
 }
 
+function setupCustomDropdown() {
+    const trigger = document.getElementById('dropdownTrigger');
+    const menu = document.getElementById('dropdownMenu');
+    const searchInput = document.getElementById('dropdownSearchInput');
+
+    if (trigger && menu) {
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = menu.style.display === 'block';
+            menu.style.display = isOpen ? 'none' : 'block';
+            if (!isOpen && searchInput) {
+                searchInput.value = '';
+                renderCustomDropdownItems('');
+                setTimeout(() => searchInput.focus(), 100);
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!document.getElementById('customDropdownContainer').contains(e.target)) {
+                menu.style.display = 'none';
+            }
+        });
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            renderCustomDropdownItems(e.target.value);
+        });
+        searchInput.addEventListener('click', (e) => e.stopPropagation());
+    }
+}
+
+function renderCustomDropdownItems(filterText = '') {
+    const container = document.getElementById('dropdownItems');
+    if (!container || !window.candidatesMap) return;
+
+    container.innerHTML = '';
+    const query = filterText.toLowerCase().trim();
+    let count = 0;
+
+    Object.values(window.candidatesMap).forEach(cand => {
+        const member = cand.member || {};
+        const name = member.name || 'Candidate';
+        const role = member.jobRole || 'Engineer';
+        const exp = member.yearsExperience || 0;
+
+        if (query && !name.toLowerCase().includes(query) && !role.toLowerCase().includes(query)) {
+            return;
+        }
+
+        count++;
+        const item = document.createElement('div');
+        item.className = 'dropdown-item';
+        if (currentCandidate && currentCandidate.member?.id === member.id) {
+            item.classList.add('selected');
+        }
+
+        const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+
+        item.innerHTML = `
+            <div class="item-avatar">${initials}</div>
+            <div class="item-info">
+                <span class="item-name">${name}</span>
+                <span class="item-meta">${role} • ${exp} yrs exp</span>
+            </div>
+            ${currentCandidate && currentCandidate.member?.id === member.id ? '<span class="item-check">✓</span>' : ''}
+        `;
+
+        item.addEventListener('click', (e) => {
+            e.stopPropagation();
+            currentCandidate = cand;
+            document.getElementById('selectedCandidateText').textContent = `${name} (${role})`;
+            document.getElementById('dropdownMenu').style.display = 'none';
+            
+            // Sync hidden select element
+            const select = document.getElementById('candidateSelect');
+            if (select) select.value = member.id;
+
+            debugLog('info', `Selected candidate via custom dropdown: '${name}'`);
+            renderProfileCard(currentCandidate);
+        });
+
+        container.appendChild(item);
+    });
+
+    if (count === 0) {
+        container.innerHTML = '<div class="dropdown-empty">No matching candidates found</div>';
+    }
+}
+
 async function loadCandidates() {
     debugLog('info', 'Fetching /api/candidates...');
     try {
@@ -220,6 +310,9 @@ async function loadCandidates() {
                 select.appendChild(opt);
             }
         });
+
+        setupCustomDropdown();
+        renderCustomDropdownItems('');
 
     } catch (err) {
         debugLog('error', 'Failed to load candidates', err.message);

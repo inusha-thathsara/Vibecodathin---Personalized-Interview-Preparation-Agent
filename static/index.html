@@ -25,8 +25,18 @@
 
             <div class="sidebar-section">
                 <label for="candidateSelect">Select Candidate</label>
-                <div class="select-wrapper">
-                    <select id="candidateSelect">
+                <div class="custom-dropdown-container" id="customDropdownContainer">
+                    <div class="custom-dropdown-trigger" id="dropdownTrigger">
+                        <span class="trigger-text" id="selectedCandidateText">-- Choose a Graduating Member --</span>
+                        <span class="trigger-arrow">▾</span>
+                    </div>
+                    <div class="custom-dropdown-menu" id="dropdownMenu" style="display: none;">
+                        <div class="dropdown-search">
+                            <input type="text" id="dropdownSearchInput" placeholder="🔍 Search name or role..." autocomplete="off" />
+                        </div>
+                        <div class="dropdown-items" id="dropdownItems"></div>
+                    </div>
+                    <select id="candidateSelect" style="display: none;">
                         <option value="" disabled selected>-- Choose a Graduating Member --</option>
                     </select>
                 </div>

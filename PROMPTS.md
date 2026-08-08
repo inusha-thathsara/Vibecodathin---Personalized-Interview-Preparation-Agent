@@ -150,3 +150,39 @@
 
 **Result:** Logged all recent user prompts and actions into `PROMPTS.md`.
 
+---
+
+### Prompt 18 — 22:05 IST
+**Tool:** Gemini (Antigravity IDE)
+**Prompt:**
+> Style this drop down box.
+
+**Result:** Replaced native browser HTML select popup with a custom glassmorphic candidate selector component featuring instant search/filtering, dark theme menu (`#0f172a`), candidate initials avatars, role badges, and active selection checkmarks.
+
+---
+
+### Prompt 19 — 22:06 IST
+**Tool:** Gemini (Antigravity IDE)
+**Prompt:**
+> Don't commit without my permission
+
+**Result:** Acknowledged user instruction. Removed automated git commit workflow; will only commit changes when explicitly requested by the user.
+
+---
+
+### Prompt 20 — 22:07 IST
+**Tool:** Gemini (Antigravity IDE)
+**Prompt:**
+> This scroll bar still needs some styling.
+
+**Result:** Added custom 6px slim scrollbar styling across all webkit browsers and Firefox (`::-webkit-scrollbar`, `::-webkit-scrollbar-thumb`, `scrollbar-width: thin`), featuring dark semi-transparent tracks and purple-cyan glowing thumbs for the candidate dropdown menu and chat viewport.
+
+---
+
+### Prompt 21 — 22:19 IST
+**Tool:** Gemini (Antigravity IDE)
+**Prompt:**
+> git commit
+
+**Result:** Received explicit user approval to commit staged changes. Created git commit with custom glassmorphic candidate dropdown UI, real-time search filter, custom scrollbars, and prompt logs.
+
