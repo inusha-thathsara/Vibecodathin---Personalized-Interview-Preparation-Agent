@@ -30,6 +30,7 @@ class TopicScore(BaseModel):
     title: str = Field(..., description="Day title")
     score: int = Field(..., description="Score 1-10")
     note: str = Field("", description="Evaluation note for this topic")
+    tools: Optional[List[str]] = Field(default_factory=list, description="Associated topic tools")
 
 class FeedbackSchema(BaseModel):
     summary: str = Field(..., description="Detailed 2-3 sentence overall evaluation")

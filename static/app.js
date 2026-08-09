@@ -245,6 +245,13 @@ async function endInterviewEarly() {
         showTypingIndicator(false);
         isWaitingForResponse = false;
 
+        if (!response.ok) {
+            const errDetail = data.detail || 'Unknown server error';
+            debugLog('error', `Server error terminating interview early (${response.status})`, errDetail);
+            appendMessage('error', `⚠️ Server Error (${response.status}): ${errDetail}`);
+            return;
+        }
+
         if (data.reply) {
             appendMessage('bot', data.reply);
         }
