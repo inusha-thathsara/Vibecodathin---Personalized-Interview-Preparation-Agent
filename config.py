@@ -23,7 +23,7 @@ EMBEDDING_CACHE_FILE = BASE_DIR / "data" / "embedding_cache.json"
 
 APP_ENV = os.getenv("APP_ENV", "development" if not IS_SERVERLESS else "production").lower()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-GEMINI_MODEL_NAME = os.getenv("GEMINI_MODEL_NAME", "gemini-2.0-flash")
+GEMINI_MODEL_NAME = os.getenv("GEMINI_MODEL_NAME", "gemini-3.5-flash")
 
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "gemma3:1b")
