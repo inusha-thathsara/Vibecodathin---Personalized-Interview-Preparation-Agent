@@ -224,6 +224,7 @@ if static_dir.exists():
         return FileResponse(static_dir / "app.js", media_type="application/javascript")
 
     @app.get("/favicon.svg")
+    @app.get("/favicon.ico")
     async def serve_favicon():
         return FileResponse(static_dir / "favicon.svg", media_type="image/svg+xml")
 
