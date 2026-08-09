@@ -211,9 +211,21 @@ async def list_candidates():
     return {"candidates": data_loader.get_all_candidates()}
 
 # Serve static frontend files
-static_dir = Path(__file__).parent / "static"
+static_dir = config.BASE_DIR / "static"
 if static_dir.exists():
     app.mount("/static", StaticFiles(directory=static_dir), name="static")
+
+    @app.get("/styles.css")
+    async def serve_css():
+        return FileResponse(static_dir / "styles.css", media_type="text/css")
+
+    @app.get("/app.js")
+    async def serve_js():
+        return FileResponse(static_dir / "app.js", media_type="application/javascript")
+
+    @app.get("/favicon.svg")
+    async def serve_favicon():
+        return FileResponse(static_dir / "favicon.svg", media_type="image/svg+xml")
 
     @app.get("/")
     @app.get("/api/index")
@@ -221,7 +233,7 @@ if static_dir.exists():
     async def serve_index():
         index_path = static_dir / "index.html"
         if index_path.exists():
-            return FileResponse(index_path)
+            return FileResponse(index_path, media_type="text/html")
         return JSONResponse({"message": "AI Interview Agent API is running."})
 
 if __name__ == "__main__":
