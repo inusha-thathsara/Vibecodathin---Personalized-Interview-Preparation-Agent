@@ -216,6 +216,8 @@ if static_dir.exists():
     app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
     @app.get("/")
+    @app.get("/api/index")
+    @app.get("/api/index.py")
     async def serve_index():
         index_path = static_dir / "index.html"
         if index_path.exists():
