@@ -10,11 +10,18 @@ if env_path.exists():
 BASE_DIR = Path(__file__).parent
 CANDIDATES_FILE = BASE_DIR / "candidates.json"
 CURRICULUM_FILE = BASE_DIR / "curriculum.json"
-DATA_DIR = BASE_DIR / "data"
-SESSIONS_DB_FILE = DATA_DIR / "sessions.db"
-EMBEDDING_CACHE_FILE = DATA_DIR / "embedding_cache.json"
 
-APP_ENV = os.getenv("APP_ENV", "development").lower()
+# Serverless / Vercel temporary data storage support
+IS_SERVERLESS = bool(os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"))
+if IS_SERVERLESS or not os.access(BASE_DIR, os.W_OK):
+    DATA_DIR = Path("/tmp/data")
+else:
+    DATA_DIR = BASE_DIR / "data"
+
+SESSIONS_DB_FILE = DATA_DIR / "sessions.db"
+EMBEDDING_CACHE_FILE = BASE_DIR / "data" / "embedding_cache.json"
+
+APP_ENV = os.getenv("APP_ENV", "development" if not IS_SERVERLESS else "production").lower()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 GEMINI_MODEL_NAME = os.getenv("GEMINI_MODEL_NAME", "gemini-2.0-flash")
 

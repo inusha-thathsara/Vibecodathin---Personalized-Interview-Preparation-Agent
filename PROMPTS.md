@@ -385,4 +385,14 @@
 
 **Result:** Completely overhauled `README.md` and `technical-spec.md` to reflect the full feature set. Documented early interview termination (`🛑 End Interview` / `endEarly: true`), enriched topic evaluation cards, zero-response evaluation safeguards, active session locks (`isInterviewInProgress`), question enforcement filters, and multi-model LLM candidate fallbacks. Staged, committed (`6322017`), and pushed to GitHub `origin/main` (**17 / 17 PASSED**).
 
+---
+
+### Prompt 44 — 10:18 IST
+**Tool:** Gemini (Antigravity IDE)
+**Prompt:**
+> Can't we refactor our project to deploy on vercel?
+
+**Result:** Refactored project configuration for instant Vercel Serverless deployment. Created `vercel.json` routing manifest for `@vercel/python`. Updated `config.py` to detect serverless read-only filesystems (`IS_SERVERLESS`) and automatically target `/tmp/data` for SQLite session stores (**17 / 17 PASSED**).
+
+
 
