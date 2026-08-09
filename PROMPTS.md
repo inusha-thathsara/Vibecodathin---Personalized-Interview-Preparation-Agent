@@ -412,6 +412,16 @@
 
 **Result:** Resolved Vercel serverless static route alias matching. Added `/api/index` and `/api/index.py` route decorators to `serve_index()` in `main.py` and updated `vercel.json` with the official `@vercel/python` builder configuration (`"dest": "api/index.py"`). Pushed commit `55c1177` to GitHub `origin/main` (**17 / 17 PASSED**).
 
+---
+
+### Prompt 47 — 10:37 IST
+**Tool:** Gemini (Antigravity IDE)
+**Prompt:**
+> [User shared Vercel screenshots showing unstyled UI due to missing static CSS/JS assets]
+
+**Result:** Diagnosed Vercel serverless static asset directory resolution. Updated `static_dir` in `main.py` to `config.BASE_DIR / "static"` and added explicit route handlers (`/styles.css`, `/app.js`, `/favicon.svg`) with strict MIME types (`text/css`, `application/javascript`, `image/svg+xml`). Updated `vercel.json` routing and pushed commit `9b77440` to GitHub `origin/main` (**17 / 17 PASSED**).
+
+
 
 
 
