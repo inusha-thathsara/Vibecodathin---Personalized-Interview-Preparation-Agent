@@ -430,6 +430,16 @@
 
 **Result:** Resolved live site favicon rendering across Chrome/Edge/Firefox browsers. Added `@app.get("/favicon.ico")` route decorator to `serve_favicon()` in `main.py` and updated `<link rel="icon">` & `<link rel="shortcut icon">` tags in `static/index.html`. Pushed commit `072947c` to GitHub `origin/main` (**17 / 17 PASSED**).
 
+---
+
+### Prompt 49 — 10:47 IST
+**Tool:** Gemini (Antigravity IDE)
+**Prompt:**
+> [User shared console screenshot showing HTTP 500 error on POST /api/interview when clicking End Interview early]
+
+**Result:** Diagnosed Pydantic schema validation error during early interview termination. Updated `TopicScore` model in `models.py` by adding missing schema field `tools: Optional[List[str]] = Field(default_factory=list)`. Added `response.ok` error checking to `endInterviewEarly()` in `static/app.js`. Pushed commit `440f3b4` to GitHub `origin/main` (**17 / 17 PASSED**).
+
+
 
 
 
