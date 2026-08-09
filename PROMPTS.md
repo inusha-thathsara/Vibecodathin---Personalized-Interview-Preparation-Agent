@@ -421,6 +421,16 @@
 
 **Result:** Diagnosed Vercel serverless static asset directory resolution. Updated `static_dir` in `main.py` to `config.BASE_DIR / "static"` and added explicit route handlers (`/styles.css`, `/app.js`, `/favicon.svg`) with strict MIME types (`text/css`, `application/javascript`, `image/svg+xml`). Updated `vercel.json` routing and pushed commit `9b77440` to GitHub `origin/main` (**17 / 17 PASSED**).
 
+---
+
+### Prompt 48 — 10:44 IST
+**Tool:** Gemini (Antigravity IDE)
+**Prompt:**
+> The faqcicon is not displayed in the live website.
+
+**Result:** Resolved live site favicon rendering across Chrome/Edge/Firefox browsers. Added `@app.get("/favicon.ico")` route decorator to `serve_favicon()` in `main.py` and updated `<link rel="icon">` & `<link rel="shortcut icon">` tags in `static/index.html`. Pushed commit `072947c` to GitHub `origin/main` (**17 / 17 PASSED**).
+
+
 
 
 
